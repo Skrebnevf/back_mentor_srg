@@ -1,0 +1,4 @@
+pyTelegramBotAPI==4.25.0
+supabase
+requests==2.31.0
+watchdog
