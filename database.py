@@ -1,18 +1,45 @@
-import supabase as sp
+import supabase
+from supabase._sync.client import SyncClient
 
-def init_db(url, key):
-    return sp.create_client(url, key)
 
-def add_user(supabase, user_id, username, name, surname):
+def init_db(url: str, key: str) -> SyncClient:
+    return supabase.create_client(url, key)
+
+
+def add_user(db: SyncClient, tg_id: int, username: str, name: str, surname: str) -> None:
     data = {
-        "id": user_id,
+        "id": tg_id,
         "username": username,
         "name": name,
         "surname": surname
     }
+    db.table("users").insert(data).execute()
 
-    resp = supabase.table("users").insert(data).execute()
 
-def get_user(supabase, user_id):
-    resp = supabase.table("users").select("*").eq("id", user_id).execute()
-    return resp.data
+def get_user(db: SyncClient, tg_id: int) -> dict:
+    resp = db.table("users").select("*").eq("id", tg_id).execute()
+    if resp.data:
+        return resp.data[0]
+    return None
+
+
+def delete_user(db: SyncClient, tg_id: int) -> None:
+    db.table('users').delete().eq('id', tg_id).execute()
+
+
+def update_user(db: SyncClient, tg_id: int, username: str, name: str, surname: str) -> str:
+    data = {
+        "id": tg_id,
+        "username": username,
+        "name": name,
+        "surname": surname
+    }
+    old_data = get_user(db, tg_id)
+    db.table("users").update(data).eq('id', tg_id).execute()
+    res = ''
+    for key in data:
+        if data[key] != old_data[key]:
+            res += f'{old_data[key]} -> {data[key]}\n'
+    if not res:
+        return 'Все данные уже актуальны!'
+    return 'Изменения:\n' + res

@@ -1,4 +1,5 @@
-import telebot
+from telebot import TeleBot
 
-def init_bot(token):
-    return telebot.TeleBot(token)
+
+def init_bot(token: str) -> TeleBot:
+    return TeleBot(token)

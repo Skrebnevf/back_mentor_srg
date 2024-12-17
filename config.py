@@ -1,6 +1,7 @@
 import configparser
 
-def load_config(filename='config.ini'):
+
+def load_config(filename: str = 'config.ini') -> dict:
     config = configparser.ConfigParser()
     config.read(filename)
     return {
