@@ -1,7 +1,6 @@
 import supabase
 from supabase._sync.client import SyncClient
 
-
 def init_db(url: str, key: str) -> SyncClient:
     return supabase.create_client(url, key)
 
@@ -20,14 +19,20 @@ def get_user(db: SyncClient, tg_id: int) -> dict:
     resp = db.table("users").select("*").eq("id", tg_id).execute()
     if resp.data:
         return resp.data[0]
-    return None
+    else:
+        return {}
 
 
 def delete_user(db: SyncClient, tg_id: int) -> None:
     db.table('users').delete().eq('id', tg_id).execute()
 
 
-def update_user(db: SyncClient, tg_id: int, username: str, name: str, surname: str) -> str:
+def update_user(db: SyncClient,
+    tg_id: int,
+    username: str,
+    name: str,
+    surname: str) -> str:
+
     data = {
         "id": tg_id,
         "username": username,
@@ -51,3 +56,17 @@ def record_message(db: SyncClient, tg_id: int, message: str) -> None:
         "message": message
     }
     db.table("message").insert(data).execute()
+
+def get_taric(db, code):
+    resp = db.table("codes").select("*").eq("code", code).execute()
+    if resp.data:
+        return resp.data[0]
+    else:
+        return {}
+
+def write_taric(db, code, description):
+    data = {
+        "code": code,
+        "description": description
+    }
+    db.table("codes").insert(data).execute()
