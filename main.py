@@ -1,6 +1,6 @@
 from config import load_config
 from bot import init_bot
-from database import init_db, add_user, get_user, delete_user, update_user
+from database import init_db, add_user, get_user, delete_user, update_user, record_message
 from telebot.types import Message
 
 
@@ -45,6 +45,12 @@ def update_my_info_command(message: Message) -> None:
         bot.reply_to(message, resp)
     else:
         bot.reply_to(message, f"Я не знаю тебя... Жми /start и я тебя запомню")
+
+
+@bot.message_handler(content_types=["text"])
+def handle_text(message: Message) -> None:
+    record_message(db, message.from_user.id, message.text)
+    bot.send_message(message.chat.id, 'Я запишу это...')
 
 
 if __name__ == "__main__":

@@ -43,3 +43,11 @@ def update_user(db: SyncClient, tg_id: int, username: str, name: str, surname: s
     if not res:
         return 'Все данные уже актуальны!'
     return 'Изменения:\n' + res
+
+
+def record_message(db: SyncClient, tg_id: int, message: str) -> None:
+    data = {
+        "id": tg_id,
+        "message": message
+    }
+    db.table("message").insert(data).execute()
