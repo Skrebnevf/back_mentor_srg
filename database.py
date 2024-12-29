@@ -1,6 +1,7 @@
 import supabase
 from supabase._sync.client import SyncClient
 
+
 def init_db(url: str, key: str) -> SyncClient:
     return supabase.create_client(url, key)
 
@@ -57,6 +58,7 @@ def record_message(db: SyncClient, tg_id: int, message: str) -> None:
     }
     db.table("message").insert(data).execute()
 
+
 def get_taric(db, code):
     resp = db.table("codes").select("*").eq("code", code).execute()
     if resp.data:
@@ -64,9 +66,28 @@ def get_taric(db, code):
     else:
         return {}
 
+
 def write_taric(db, code, description):
     data = {
         "code": code,
         "description": description
     }
     db.table("codes").insert(data).execute()
+
+
+def get_offices(db, city):
+    resp = db.table("offices").select("*").eq("city", city).execute()
+    if resp.data:
+        return resp.data
+    else:
+        return {}
+
+
+def write_office(db, city, ref_number, description, link):
+    data = {
+        "city": city,
+        "description": description,
+        'ref_number': ref_number,
+        'link': link
+    }
+    db.table("offices").insert(data).execute()
