@@ -1,6 +1,6 @@
 from config import load_config
 from bot import init_bot
-from database import init_db, get_taric, write_taric, add_user, get_user, delete_user, update_user, record_message, get_offices, write_office
+from database import init_db, get_taric, search_taric, write_taric, add_user, get_user, delete_user, update_user, record_message, get_offices, write_office
 import external
 import re
 
@@ -51,7 +51,7 @@ def process_code(message):
            external_description = external_result.get("suggestions")
            external_description = external_description[0].get("value")
            external_description = re.sub(r'<.*?>', '', external_description)
-           external_description = re.match(r'^\d+', external_description).group() 
+           external_description = re.match(r'^\d+', external_description).group()
            bot.reply_to(message, f"Description - {external_description}")
            write_taric(db, code, external_description)
 
@@ -70,7 +70,7 @@ def process_offices(message):
             bot.send_message(message.chat.id, f"ref_number - {office['ref_number']}\ndescription - {office['description']}\nlink - {office['link']}", disable_web_page_preview=True)
         return
     external_result = external.get_offices(city)
-    if not external_result or 'total' not in external_result:        
+    if not external_result or 'total' not in external_result:
         bot.reply_to(message, f"Офисов в {city} нет, но вы держитесь там.")
         return
     offices = external_result['suggestions']
@@ -97,12 +97,21 @@ def update_my_info_command(message) -> None:
     else:
         bot.reply_to(message, f"Я не знаю тебя... Жми /start и я тебя запомню")
 
+@bot.message_handler(commands=["search"])
+def handle_search_by_description(message):
+    bot.reply_to(message, "Введи текст для поиска")
+    bot.register_next_step_handler(message, process_search)
+
+def process_search(message):
+    result = search_taric(db, message.text)
+    if result:
+        code = result.get("code")
+        bot.reply_to(message, f"Code - {code}")
 
 @bot.message_handler(content_types=["text"])
 def handle_text(message) -> None:
     record_message(db, message.from_user.id, message.text)
     bot.send_message(message.chat.id, 'Я запишу это...')
-
 
 if __name__ == "__main__":
     print('Бот запускается...')

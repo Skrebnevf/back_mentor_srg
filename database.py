@@ -91,3 +91,10 @@ def write_office(db, city, ref_number, description, link):
         'link': link
     }
     db.table("offices").insert(data).execute()
+
+def search_taric(db, description):
+    resp = db.table("codes").select("*").ilike("description", f"%{description}%").execute()
+    if resp.data:
+        return resp.data[0]
+    else:
+        return {}
