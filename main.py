@@ -57,7 +57,7 @@ def process_code(message):
 
 
 @bot.message_handler(commands=['offices'])
-def code_command(message):
+def office_command(message):
     bot.reply_to(message, "Введите название города для поиска офисов на английском. К примеру Berlin.")
     bot.register_next_step_handler(message, process_offices)
 
