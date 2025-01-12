@@ -1,6 +1,6 @@
 import supabase
 from supabase._sync.client import SyncClient
-
+from typing import Any
 
 def init_db(url: str, key: str) -> SyncClient:
     return supabase.create_client(url, key)
@@ -16,12 +16,16 @@ def add_user(db: SyncClient, tg_id: int, username: str, name: str, surname: str)
     db.table("users").insert(data).execute()
 
 
-def get_user(db: SyncClient, tg_id: int) -> dict:
-    resp = db.table("users").select("*").eq("id", tg_id).execute()
+def get_process(db: SyncClient, table: str, select: str, equal: str, value: Any) -> dict:
+    resp = db.table(table).select(select).eq(equal, value).execute()
     if resp.data:
         return resp.data[0]
     else:
         return {}
+
+
+def get_user(db: SyncClient, tg_id: int) -> dict:
+    return get_process(db, "users", '*', 'id', tg_id)
 
 
 def delete_user(db: SyncClient, tg_id: int) -> None:
@@ -91,6 +95,7 @@ def write_office(db, city, ref_number, description, link):
         'link': link
     }
     db.table("offices").insert(data).execute()
+
 
 def search_taric(db, description):
     resp = db.table("codes").select("*").ilike("description", f"%{description}%").execute()

@@ -97,21 +97,38 @@ def update_my_info_command(message) -> None:
     else:
         bot.reply_to(message, f"Я не знаю тебя... Жми /start и я тебя запомню")
 
+
 @bot.message_handler(commands=["search"])
 def handle_search_by_description(message):
     bot.reply_to(message, "Введи текст для поиска")
     bot.register_next_step_handler(message, process_search)
 
+
 def process_search(message):
-    result = search_taric(db, message.text)
+    try:
+        result = search_taric(db, message.text)
+    except Exception as e:
+        text_e = str(e)
+        if '[Errno' in text_e:
+            l = text_e.index('[Errno ') + len('[Errno ')
+            r = text_e.index(']', l)
+            if text_e[l:r] == '11001':
+                bot.reply_to(message, 'Например отвалилась база данных...')
+                return
+        bot.reply_to(message, 'Что-то сломалось')
+        return
     if result:
         code = result.get("code")
         bot.reply_to(message, f"Code - {code}")
+    else:
+        bot.reply_to(message, 'По данному запросу ничего нет.')
+
 
 @bot.message_handler(content_types=["text"])
 def handle_text(message) -> None:
     record_message(db, message.from_user.id, message.text)
     bot.send_message(message.chat.id, 'Я запишу это...')
+
 
 if __name__ == "__main__":
     print('Бот запускается...')
